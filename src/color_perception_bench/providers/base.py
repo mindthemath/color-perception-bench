@@ -22,6 +22,7 @@ class EndpointConfig:
     method: str = "POST"
     input_field: str = "input"
     output_field: str = "embedding"
+    model: str | None = None  # Model name to include in request
 
 
 @dataclass

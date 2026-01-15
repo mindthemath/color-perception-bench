@@ -178,12 +178,14 @@ def _config_to_provider_config(name: str, config: dict) -> ProviderConfig:
             method=text_ep.get("method", "POST"),
             input_field=text_ep.get("input_field", "input"),
             output_field=text_ep.get("output_field", "embedding"),
+            model=text_ep.get("model"),
         ),
         image_endpoint=EndpointConfig(
             path=image_ep["path"],
             method=image_ep.get("method", "POST"),
             input_field=image_ep.get("input_field", "input"),
             output_field=image_ep.get("output_field", "embedding"),
+            model=image_ep.get("model"),
         ),
         api_key_env_var=config.get("api_key_env_var") or config.get("api_key_env"),
         batch_config=BatchConfig(),  # Will be discovered

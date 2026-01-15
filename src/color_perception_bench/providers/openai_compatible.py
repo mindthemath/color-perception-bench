@@ -211,6 +211,10 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
             payload = {
                 input_field: batch if len(batch) > 1 else batch[0],
             }
+            
+            # Add model if specified
+            if self.config.text_endpoint.model:
+                payload["model"] = self.config.text_endpoint.model
 
             async with self._session.post(
                 url, json=payload, headers=self._get_headers()
@@ -249,6 +253,10 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
             payload = {
                 input_field: batch if len(batch) > 1 else batch[0],
             }
+            
+            # Add model if specified
+            if self.config.image_endpoint.model:
+                payload["model"] = self.config.image_endpoint.model
 
             async with self._session.post(
                 url, json=payload, headers=self._get_headers()
