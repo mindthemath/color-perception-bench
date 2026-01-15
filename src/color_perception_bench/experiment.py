@@ -143,21 +143,62 @@ def compute_distances_and_plot(data):
     cb2.set_label("Log Count")
 
     # Plot 3: Histogram of Text-Image Distances
-    ax3.hist(cross_modal_dists, bins=50, color="skyblue", edgecolor="black")
+    counts, bins, patches = ax3.hist(
+        cross_modal_dists, bins=50, color="skyblue", edgecolor="black"
+    )
     ax3.set_xlabel("Cosine Distance (Text vs Image)", fontsize=20)
     ax3.set_ylabel("Count", fontsize=20)
     ax3.set_title(f"Distribution of Text-Image Alignment (N={n})", fontsize=24)
 
     # Add stats
     median_dist = np.median(cross_modal_dists)
+    mean_dist = np.mean(cross_modal_dists)
+
+    # Vertical line
     ax3.axvline(
         median_dist,
         color="red",
         linestyle="dashed",
-        linewidth=1,
-        label=f"Median: {median_dist:.4f}",
+        linewidth=5,
     )
-    ax3.legend(fontsize=16)
+
+    # Add text annotation for median
+    ax3.annotate(
+        f"Median: {median_dist:.4f}",
+        xy=(median_dist, 0.87),
+        xycoords=ax3.get_xaxis_transform(),
+        xytext=(0.5, 0.87),
+        textcoords="axes fraction",
+        color="red",
+        fontsize=20,
+        verticalalignment="center",
+        arrowprops=dict(arrowstyle="->", color="red", linewidth=3),
+    )
+
+    # Vertical line
+    ax3.axvline(
+        mean_dist,
+        color="blue",
+        linestyle="dashed",
+        linewidth=5,
+    )
+
+    # Add text annotation for mean
+    ax3.annotate(
+        f"Mean: {mean_dist:.4f}",
+        xy=(mean_dist, 0.92),
+        xycoords=ax3.get_xaxis_transform(),
+        xytext=(0.5, 0.92),
+        textcoords="axes fraction",
+        color="blue",
+        fontsize=20,
+        verticalalignment="center",
+        arrowprops=dict(arrowstyle="->", color="blue", linewidth=3),
+    )
+
+    # Increase tick label sizes
+    for ax in [ax1, ax2, ax3]:
+        ax.tick_params(axis="both", which="major", labelsize=20)
 
     plt.tight_layout(rect=[0, 0, 1, 0.975])
     output_path = "color_perception_correlation.png"
