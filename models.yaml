@@ -13,3 +13,56 @@ models:
       input_field: input
       output_field: embedding
     user_batch_size: 1
+
+  # Voyage AI - Best commercial option for cross-modal (same embedding space)
+  # Sign up: https://www.voyageai.com/ → Dashboard → API Keys
+  voyage-multimodal-3:
+    provider_type: openai_compatible
+    base_url: https://api.voyageai.com/v1
+    text_endpoint:
+      path: /embeddings
+      method: POST
+      input_field: input
+      output_field: data[0].embedding
+      model: voyage-multimodal-3
+    image_endpoint:
+      path: /embeddings
+      method: POST
+      input_field: input
+      output_field: data[0].embedding
+      model: voyage-multimodal-3
+    api_key_env: VOYAGE_API_KEY
+    user_batch_size: 128
+
+  # Jina AI - Latest CLIP model (Oct 2024)
+  # Sign up: https://jina.ai/ → Settings → API Tokens (free tier available)
+  jina-clip-v2:
+    provider_type: openai_compatible
+    base_url: https://api.jina.ai/v1
+    text_endpoint:
+      path: /embeddings
+      method: POST
+      input_field: input
+      output_field: data[0].embedding
+      model: jina-clip-v2
+    image_endpoint:
+      path: /embeddings
+      method: POST
+      input_field: input
+      output_field: data[0].embedding
+      model: jina-clip-v2
+    api_key_env: JINA_API_KEY
+    user_batch_size: 32
+
+  # Example: Self-hosted OpenAI CLIP (most common open source choice)
+  # Requires running your own server with transformers/sentence-transformers
+  # clip-vit-base-patch32:
+  #   provider_type: openai_compatible
+  #   base_url: http://your-clip-server:8000
+  #   text_endpoint:
+  #     path: /embeddings
+  #     model: openai/clip-vit-base-patch32
+  #   image_endpoint:
+  #     path: /embeddings
+  #     model: openai/clip-vit-base-patch32
+  #   user_batch_size: 64
