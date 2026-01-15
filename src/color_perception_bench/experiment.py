@@ -89,6 +89,11 @@ def compute_distances_and_plot(data):
     text_sims = np.dot(text_embs, text_embs.T)
     text_dists = 1 - text_sims
 
+    # 4. Same-color Text vs Image Embedding Distances
+    print("Computing Cross-modal distances...")
+    cross_modal_sims = np.sum(text_embs * img_embs, axis=1)
+    cross_modal_dists = 1 - cross_modal_sims
+
     # Extract upper triangle indices (excluding diagonal)
     iu = np.triu_indices(n, k=1)
 
@@ -100,38 +105,64 @@ def compute_distances_and_plot(data):
 
     # Plotting
     print("Generating plots...")
-    fig, axes = plt.subplots(1, 2, figsize=(18, 8))
+    # Use GridSpec to create a layout with 2 rows: top row with 2 cols, bottom row with 1 col
+    fig = plt.figure(figsize=(18, 18))
     fig.suptitle(
-        "Pairwise Distance Correlation: RGB Color Space (Euclidean) vs Embedding Space (Cosine)",
-        fontsize=16,
+        "Color Perception Analysis: Spaces & Alignment",
+        fontsize=32,
     )
+
+    gs = fig.add_gridspec(2, 2, height_ratios=[1, 1])
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax2 = fig.add_subplot(gs[0, 1])
+    ax3 = fig.add_subplot(gs[1, :])  # Spans both columns
+
+    # Make top plots square
+    ax1.set_box_aspect(1)
+    ax2.set_box_aspect(1)
 
     # Plot 1: RGB vs Image Embed
     # Using hexbin for better visualization of dense points
-    hb1 = axes[0].hexbin(
+    hb1 = ax1.hexbin(
         rgb_flat, img_flat, gridsize=50, cmap="viridis", mincnt=1, bins="log"
     )
-    axes[0].set_xlabel("RGB Euclidean Distance")
-    axes[0].set_ylabel("Image Embedding Cosine Distance")
-    axes[0].set_title("Color Space vs Image Embeddings")
-    cb1 = fig.colorbar(hb1, ax=axes[0])
+    ax1.set_xlabel("RGB Euclidean Distance", fontsize=20)
+    ax1.set_ylabel("Image Embedding Cosine Distance", fontsize=20)
+    ax1.set_title("Color Space vs Image Embeddings", fontsize=24)
+    cb1 = fig.colorbar(hb1, ax=ax1)
     cb1.set_label("Log Count")
 
     # Plot 2: RGB vs Text Embed
-    hb2 = axes[1].hexbin(
+    hb2 = ax2.hexbin(
         rgb_flat, text_flat, gridsize=50, cmap="plasma", mincnt=1, bins="log"
     )
-    axes[1].set_xlabel("RGB Euclidean Distance")
-    axes[1].set_ylabel("Text Embedding Cosine Distance")
-    axes[1].set_title("Color Space vs Text Embeddings")
-    cb2 = fig.colorbar(hb2, ax=axes[1])
+    ax2.set_xlabel("RGB Euclidean Distance", fontsize=20)
+    ax2.set_ylabel("Text Embedding Cosine Distance", fontsize=20)
+    ax2.set_title("Color Space vs Text Embeddings", fontsize=24)
+    cb2 = fig.colorbar(hb2, ax=ax2)
     cb2.set_label("Log Count")
 
-    plt.tight_layout()
+    # Plot 3: Histogram of Text-Image Distances
+    ax3.hist(cross_modal_dists, bins=50, color="skyblue", edgecolor="black")
+    ax3.set_xlabel("Cosine Distance (Text vs Image)", fontsize=20)
+    ax3.set_ylabel("Count", fontsize=20)
+    ax3.set_title(f"Distribution of Text-Image Alignment (N={n})", fontsize=24)
+
+    # Add stats
+    median_dist = np.median(cross_modal_dists)
+    ax3.axvline(
+        median_dist,
+        color="red",
+        linestyle="dashed",
+        linewidth=1,
+        label=f"Median: {median_dist:.4f}",
+    )
+    ax3.legend(fontsize=16)
+
+    plt.tight_layout(rect=[0, 0, 1, 0.975])
     output_path = "color_perception_correlation.png"
     plt.savefig(output_path)
     print(f"Saved plot to {output_path}")
-    # plt.show()
 
 
 if __name__ == "__main__":
