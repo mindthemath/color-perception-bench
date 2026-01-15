@@ -4,13 +4,18 @@ from matplotlib import colors as mcolors
 from PIL import Image
 
 ######################### CONSTANTS #########################
-# 949 colors (includes black and white)
-XKCD_COLORS_HEX = {k[5:]: v for k, v in mcolors.XKCD_COLORS.items()}
-
-XKCD_COLORS_RGB = {
-    name: tuple(int(round(c * 255)) for c in mcolors.to_rgb(hexv))
-    for name, hexv in XKCD_COLORS_HEX.items()
+# 949 colors (includes black and white) - "5:" be we want to strip "xkcd:"
+XKCD_COLORS_HEX: dict[str, str] = {
+    k[5:]: str(v) for k, v in mcolors.XKCD_COLORS.items()
 }
+
+
+def _hex_to_rgb(hex_code: str) -> tuple[int, int, int]:
+    r, g, b = mcolors.to_rgb(hex_code)
+    return (int(round(r * 255)), int(round(g * 255)), int(round(b * 255)))
+
+
+XKCD_COLORS_RGB = {name: _hex_to_rgb(hexv) for name, hexv in XKCD_COLORS_HEX.items()}
 
 XKCD_COLORS_HSV = {
     name: tuple(int(round(c * 255)) for c in mcolors.rgb_to_hsv(mcolors.to_rgb(hexv)))

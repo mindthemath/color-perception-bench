@@ -25,7 +25,6 @@ def get_embeddings():
         try:
             # Get text embedding for the color name
             text_emb = get_text_embedding(name)
-
             # Generate swatch and get image embedding
             swatch = create_swatch_image(rgb)
             img_emb = get_image_embedding(swatch)
@@ -222,7 +221,7 @@ def plot_analysis(results, output_path="color_perception_correlation.png"):
     for ax in [ax1, ax2, ax3]:
         ax.tick_params(axis="both", which="major", labelsize=20)
 
-    plt.tight_layout(rect=[0, 0, 1, 0.975])
+    plt.tight_layout(rect=[0, 0, 1, 0.975])  # type: ignore
     output_path = "color_perception_correlation.png"
     plt.savefig(output_path)
     print(f"Saved plot to {output_path}")
