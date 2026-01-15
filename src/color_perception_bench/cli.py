@@ -76,9 +76,9 @@ def show_main_menu() -> str:
 def show_model_menu() -> str:
     """Show the model management menu."""
     choices = [
-        "➕ Add Model",
         "📝 List Models",
         "🔧 Edit Batch Size",
+        "➕ Add Model",
         "🗑️  Remove Model",
         "⬅️  Back to Main Menu",
     ]
