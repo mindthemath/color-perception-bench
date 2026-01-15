@@ -1,3 +1,7 @@
+exp: lint
+	uv run src/color_perception_bench/experiment.py
+
+
 lint:
 	uvx black src
 	uvx isort --profile black src
