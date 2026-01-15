@@ -1,0 +1,20 @@
+[project]
+name = "color-perception-bench"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Michael Pilosov", email = "consistentbayes@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.10.8",
+    "requests>=2.32.5",
+]
+
+[project.scripts]
+color-perception-bench = "color_perception_bench:main"
+
+[build-system]
+requires = ["uv_build>=0.9.5,<0.10.0"]
+build-backend = "uv_build"
