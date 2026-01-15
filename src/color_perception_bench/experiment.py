@@ -43,14 +43,14 @@ def get_embeddings():
     return data
 
 
-def compute_distances_and_plot(data):
-    """Compute pairwise distances and plot correlations."""
+def compute_distances(data):
+    """Compute pairwise distances for RGB and embeddings."""
     names = list(data.keys())
     n = len(names)
 
     if n < 2:
         print("Not enough data to calculate correlations.")
-        return
+        return None
 
     # Prepare arrays
     # RGB: (N, 3)
@@ -103,7 +103,27 @@ def compute_distances_and_plot(data):
 
     print(f"Analyzed {len(rgb_flat)} pairs.")
 
-    # Plotting
+    return {
+        "n": n,
+        "rgb_flat": rgb_flat,
+        "img_flat": img_flat,
+        "text_flat": text_flat,
+        "cross_modal_dists": cross_modal_dists,
+    }
+
+
+def plot_analysis(results, output_path="color_perception_correlation.png"):
+    """Plot correlations and distributions from analysis results."""
+    if not results:
+        print("No results to plot.")
+        return
+
+    n = results["n"]
+    rgb_flat = results["rgb_flat"]
+    img_flat = results["img_flat"]
+    text_flat = results["text_flat"]
+    cross_modal_dists = results["cross_modal_dists"]
+
     print("Generating plots...")
     # Use GridSpec to create a layout with 2 rows: top row with 2 cols, bottom row with 1 col
     fig = plt.figure(figsize=(18, 18))
@@ -210,4 +230,5 @@ def compute_distances_and_plot(data):
 
 if __name__ == "__main__":
     embeddings_data = get_embeddings()
-    compute_distances_and_plot(embeddings_data)
+    analysis_results = compute_distances(embeddings_data)
+    plot_analysis(analysis_results)
