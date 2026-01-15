@@ -13,3 +13,17 @@ models:
       input_field: input
       output_field: embedding
     user_batch_size: 1
+  openai:
+    provider_type: openai_compatible
+    base_url: https://api.openai.com
+    text_endpoint:
+      path: /v1/embeddings
+      method: POST
+      input_field: input
+      output_field: embedding
+    image_endpoint:
+      path: /v1/embeddings
+      method: POST
+      input_field: input
+      output_field: embedding
+    api_key_env_var: OPENAI_API_KEY
