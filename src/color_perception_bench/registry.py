@@ -185,7 +185,7 @@ def _config_to_provider_config(name: str, config: dict) -> ProviderConfig:
             input_field=image_ep.get("input_field", "input"),
             output_field=image_ep.get("output_field", "embedding"),
         ),
-        api_key_env_var=config.get("api_key_env_var"),
+        api_key_env_var=config.get("api_key_env_var") or config.get("api_key_env"),
         batch_config=BatchConfig(),  # Will be discovered
         user_batch_size=config.get("user_batch_size"),
     )

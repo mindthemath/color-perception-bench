@@ -58,7 +58,8 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
     async def _ensure_session(self):
         """Create aiohttp session if not exists."""
         if self._session is None:
-            self._session = aiohttp.ClientSession(headers=self._get_headers())
+            # Don't set headers at session creation - add them per-request instead
+            self._session = aiohttp.ClientSession()
 
     async def _fetch_openapi_schema(self) -> dict:
         """Fetch and cache the OpenAPI schema."""
@@ -211,7 +212,9 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
                 input_field: batch if len(batch) > 1 else batch[0],
             }
 
-            async with self._session.post(url, json=payload) as resp:
+            async with self._session.post(
+                url, json=payload, headers=self._get_headers()
+            ) as resp:
                 if resp.status != 200:
                     text = await resp.text()
                     raise RuntimeError(f"Text embedding failed: {resp.status} - {text}")
@@ -247,7 +250,9 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
                 input_field: batch if len(batch) > 1 else batch[0],
             }
 
-            async with self._session.post(url, json=payload) as resp:
+            async with self._session.post(
+                url, json=payload, headers=self._get_headers()
+            ) as resp:
                 if resp.status != 200:
                     text = await resp.text()
                     raise RuntimeError(
