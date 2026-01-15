@@ -238,6 +238,6 @@ def create_default_local_model() -> None:
             image_endpoint="/img/embed",
             text_input_field="input",
             text_output_field="embedding",
-            image_input_field="content",  # Image endpoint uses 'content' not 'input'
+            image_input_field="input",
             image_output_field="embedding",
         )

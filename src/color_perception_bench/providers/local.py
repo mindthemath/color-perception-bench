@@ -248,9 +248,8 @@ class LocalProvider(BaseAsyncProvider):
         base64_images = [img_to_base64(img) for img in images]
 
         if self.config.batch_config.supported and len(images) > 1:
-            # Batch request (uses plural field name for batches)
-            batch_field = "contents" if input_field == "content" else input_field + "s"
-            payload = {batch_field: base64_images}
+            # Batch request
+            payload = {input_field: base64_images}
             async with self._session.post(url, json=payload) as resp:
                 if resp.status != 200:
                     text = await resp.text()

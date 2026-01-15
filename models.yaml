@@ -10,6 +10,6 @@ models:
     image_endpoint:
       path: /img/embed
       method: POST
-      input_field: content
+      input_field: input
       output_field: embedding
     user_batch_size: 1
