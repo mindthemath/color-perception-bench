@@ -130,17 +130,19 @@ def compute_distances_and_plot(data):
     ax1.set_ylabel("Image Embedding Cosine Distance", fontsize=20)
     ax1.set_title("Color Space vs Image Embeddings", fontsize=24)
     cb1 = fig.colorbar(hb1, ax=ax1)
-    cb1.set_label("Log Count")
+    cb1.set_label("Log Count", fontsize=20)
+    cb1.ax.tick_params(labelsize=16)
 
     # Plot 2: RGB vs Text Embed
     hb2 = ax2.hexbin(
-        rgb_flat, text_flat, gridsize=50, cmap="plasma", mincnt=1, bins="log"
+        rgb_flat, text_flat, gridsize=50, cmap="viridis", mincnt=1, bins="log"
     )
     ax2.set_xlabel("RGB Euclidean Distance", fontsize=20)
     ax2.set_ylabel("Text Embedding Cosine Distance", fontsize=20)
     ax2.set_title("Color Space vs Text Embeddings", fontsize=24)
     cb2 = fig.colorbar(hb2, ax=ax2)
-    cb2.set_label("Log Count")
+    cb2.set_label("Log Count", fontsize=20)
+    cb2.ax.tick_params(labelsize=16)
 
     # Plot 3: Histogram of Text-Image Distances
     counts, bins, patches = ax3.hist(
@@ -167,7 +169,7 @@ def compute_distances_and_plot(data):
         f"Median: {median_dist:.4f}",
         xy=(median_dist, 0.87),
         xycoords=ax3.get_xaxis_transform(),
-        xytext=(0.5, 0.87),
+        xytext=(0.75, 0.87),
         textcoords="axes fraction",
         color="red",
         fontsize=20,
@@ -185,10 +187,10 @@ def compute_distances_and_plot(data):
 
     # Add text annotation for mean
     ax3.annotate(
-        f"Mean: {mean_dist:.4f}",
+        f"Mean:    {mean_dist:.4f}",
         xy=(mean_dist, 0.92),
         xycoords=ax3.get_xaxis_transform(),
-        xytext=(0.5, 0.92),
+        xytext=(0.75, 0.92),
         textcoords="axes fraction",
         color="blue",
         fontsize=20,
