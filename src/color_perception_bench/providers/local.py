@@ -50,9 +50,7 @@ class LocalProvider(BaseAsyncProvider):
                 self._openapi_schema = await resp.json()
                 return self._openapi_schema
         except aiohttp.ClientError as e:
-            raise ProviderValidationError(
-                f"Failed to connect to {url}: {e}"
-            ) from e
+            raise ProviderValidationError(f"Failed to connect to {url}: {e}") from e
 
     async def validate_endpoints(self) -> None:
         """Validate that configured endpoints exist in OpenAPI schema."""
@@ -197,7 +195,9 @@ class LocalProvider(BaseAsyncProvider):
                 data = await resp.json()
 
                 # Handle batch response (could be list of embeddings or nested)
-                result = data.get(output_field, data.get("embeddings", data.get("data", [])))
+                result = data.get(
+                    output_field, data.get("embeddings", data.get("data", []))
+                )
                 if isinstance(result, list) and len(result) > 0:
                     if isinstance(result[0], dict):
                         # OpenAI style: [{"embedding": [...]}, ...]
@@ -253,10 +253,14 @@ class LocalProvider(BaseAsyncProvider):
             async with self._session.post(url, json=payload) as resp:
                 if resp.status != 200:
                     text = await resp.text()
-                    raise RuntimeError(f"Image embedding failed: {resp.status} - {text}")
+                    raise RuntimeError(
+                        f"Image embedding failed: {resp.status} - {text}"
+                    )
                 data = await resp.json()
 
-                result = data.get(output_field, data.get("embeddings", data.get("data", [])))
+                result = data.get(
+                    output_field, data.get("embeddings", data.get("data", []))
+                )
                 if isinstance(result, list) and len(result) > 0:
                     if isinstance(result[0], dict):
                         embeddings = [
@@ -274,7 +278,9 @@ class LocalProvider(BaseAsyncProvider):
                 async with self._session.post(url, json=payload) as resp:
                     if resp.status != 200:
                         text = await resp.text()
-                        raise RuntimeError(f"Image embedding failed: {resp.status} - {text}")
+                        raise RuntimeError(
+                            f"Image embedding failed: {resp.status} - {text}"
+                        )
                     data = await resp.json()
                     emb = data.get(output_field, data)
                     embeddings.append(np.array(emb, dtype=np.float32))

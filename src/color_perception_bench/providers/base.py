@@ -146,7 +146,7 @@ class BaseAsyncProvider(ABC):
 
     async def close(self) -> None:
         """Close the aiohttp session."""
-        if self._session is not None and hasattr(self._session, 'close'):
+        if self._session is not None and hasattr(self._session, "close"):
             await self._session.close()
             self._session = None
 

@@ -21,11 +21,11 @@ from color_perception_bench.cache import (
 from color_perception_bench.registry import (
     VALID_BATCH_SIZES,
     add_model,
+    create_default_local_model,
     get_model_config,
     list_models,
     remove_model,
     update_model_batch_size,
-    create_default_local_model,
 )
 
 console = Console()
@@ -158,7 +158,11 @@ def add_model_ui():
 
     base_url = questionary.text(
         "Base URL (e.g., http://localhost:8080 or https://api.openai.com):",
-        default="http://localhost:8080" if provider_type == "local" else "https://api.openai.com",
+        default=(
+            "http://localhost:8080"
+            if provider_type == "local"
+            else "https://api.openai.com"
+        ),
         style=custom_style,
     ).ask()
 
@@ -206,29 +210,41 @@ def add_model_ui():
     batch_size = None
 
     if show_advanced:
-        text_input_field = questionary.text(
-            "Text input field name:",
-            default="input",
-            style=custom_style,
-        ).ask() or "input"
+        text_input_field = (
+            questionary.text(
+                "Text input field name:",
+                default="input",
+                style=custom_style,
+            ).ask()
+            or "input"
+        )
 
-        text_output_field = questionary.text(
-            "Text output field name:",
-            default="embedding",
-            style=custom_style,
-        ).ask() or "embedding"
+        text_output_field = (
+            questionary.text(
+                "Text output field name:",
+                default="embedding",
+                style=custom_style,
+            ).ask()
+            or "embedding"
+        )
 
-        image_input_field = questionary.text(
-            "Image input field name:",
-            default="input",
-            style=custom_style,
-        ).ask() or "input"
+        image_input_field = (
+            questionary.text(
+                "Image input field name:",
+                default="input",
+                style=custom_style,
+            ).ask()
+            or "input"
+        )
 
-        image_output_field = questionary.text(
-            "Image output field name:",
-            default="embedding",
-            style=custom_style,
-        ).ask() or "embedding"
+        image_output_field = (
+            questionary.text(
+                "Image output field name:",
+                default="embedding",
+                style=custom_style,
+            ).ask()
+            or "embedding"
+        )
 
         set_batch = questionary.confirm(
             "Set manual batch size? (otherwise auto-detect)",

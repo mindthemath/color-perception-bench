@@ -21,7 +21,7 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
     Provider for OpenAI-compatible embedding APIs.
 
     Supports standard OpenAI-style endpoints:
-    - POST /v1/embeddings with {"input": "text", "model": "..."} 
+    - POST /v1/embeddings with {"input": "text", "model": "..."}
     - POST /v1/embeddings with {"input": ["base64..."], "model": "..."}
 
     Also works with other providers that follow similar patterns
@@ -250,7 +250,9 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
             async with self._session.post(url, json=payload) as resp:
                 if resp.status != 200:
                     text = await resp.text()
-                    raise RuntimeError(f"Image embedding failed: {resp.status} - {text}")
+                    raise RuntimeError(
+                        f"Image embedding failed: {resp.status} - {text}"
+                    )
 
                 data = await resp.json()
                 batch_embeddings = self._parse_embedding_response(data)

@@ -27,7 +27,9 @@ from color_perception_bench.registry import get_provider, sanitize_model_name
 
 if TYPE_CHECKING:
     from color_perception_bench.providers.local import LocalProvider
-    from color_perception_bench.providers.openai_compatible import OpenAICompatibleProvider
+    from color_perception_bench.providers.openai_compatible import (
+        OpenAICompatibleProvider,
+    )
 
 RESULTS_FILE = Path("benchmark_results.tsv")
 
@@ -54,10 +56,14 @@ async def fetch_embeddings_for_model(
     if not force_refresh:
         cached = load_embeddings(model_name)
         if cached is not None:
-            console.print(f"[green]✓[/green] Loaded {len(cached)} colors from cache for [bold]{model_name}[/bold]")
+            console.print(
+                f"[green]✓[/green] Loaded {len(cached)} colors from cache for [bold]{model_name}[/bold]"
+            )
             return cached
 
-    console.print(f"[blue]→[/blue] Fetching embeddings for [bold]{model_name}[/bold]...")
+    console.print(
+        f"[blue]→[/blue] Fetching embeddings for [bold]{model_name}[/bold]..."
+    )
 
     async with provider:
         # Validate endpoints
@@ -77,7 +83,9 @@ async def fetch_embeddings_for_model(
                 f"using={effective_batch}"
             )
         else:
-            console.print(f"  [yellow]![/yellow] No batch support, using sequential requests")
+            console.print(
+                f"  [yellow]![/yellow] No batch support, using sequential requests"
+            )
 
         # Prepare data
         color_names = list(XKCD_COLORS_RGB.keys())
