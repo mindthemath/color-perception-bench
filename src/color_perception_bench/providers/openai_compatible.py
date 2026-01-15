@@ -71,20 +71,25 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
         try:
             async with self._session.get(url) as resp:
                 if resp.status != 200:
-                    raise ProviderValidationError(
-                        f"Failed to fetch OpenAPI schema from {url}: HTTP {resp.status}"
-                    )
+                    # OpenAI and some providers don't expose /openapi.json
+                    # Return empty schema to skip validation
+                    self._openapi_schema = {"paths": {}}
+                    return self._openapi_schema
                 self._openapi_schema = await resp.json()
                 return self._openapi_schema
-        except aiohttp.ClientError as e:
-            raise ProviderValidationError(
-                f"Failed to connect to {url}: {e}"
-            ) from e
+        except aiohttp.ClientError:
+            # If connection fails, skip validation
+            self._openapi_schema = {"paths": {}}
+            return self._openapi_schema
 
     async def validate_endpoints(self) -> None:
         """Validate that configured endpoints exist in OpenAPI schema."""
         schema = await self._fetch_openapi_schema()
         paths = schema.get("paths", {})
+
+        # If no paths (schema not available), skip validation
+        if not paths:
+            return
 
         # Validate text endpoint
         text_path = self.config.text_endpoint.path
