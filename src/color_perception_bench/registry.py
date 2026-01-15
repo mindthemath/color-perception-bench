@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from dotenv import load_dotenv
+from dotenv import find_dotenv, load_dotenv
 
 from color_perception_bench.providers.base import (
     BatchConfig,
@@ -16,8 +16,8 @@ from color_perception_bench.providers.base import (
 from color_perception_bench.providers.local import LocalProvider
 from color_perception_bench.providers.openai_compatible import OpenAICompatibleProvider
 
-# Load .env file from project root
-load_dotenv()
+# Load .env file - search up the directory tree to find it
+load_dotenv(find_dotenv(usecwd=True))
 
 REGISTRY_FILE = Path("models.yaml")
 VALID_BATCH_SIZES = [1, 4, 8, 16, 32, 64, 128, 256, 512, 1024]
