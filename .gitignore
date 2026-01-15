@@ -2,3 +2,16 @@ __pycache__/
 *.joblib
 *.png
 *.sw[opqr]
+
+# Environment variables (API keys)
+.env
+.env.local
+.env.*.local
+
+# Cache directory
+cache/
+
+# Benchmark results (optional - may want to track)
+# benchmark_results.tsv
+*.tsv
+test_*

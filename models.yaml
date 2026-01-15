@@ -1,0 +1,15 @@
+models:
+  local-default:
+    provider_type: local
+    base_url: http://localhost:8080
+    text_endpoint:
+      path: /txt/embed
+      method: POST
+      input_field: input
+      output_field: embedding
+    image_endpoint:
+      path: /img/embed
+      method: POST
+      input_field: content
+      output_field: embedding
+    user_batch_size: 1
