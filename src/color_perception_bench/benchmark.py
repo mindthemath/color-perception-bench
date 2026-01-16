@@ -256,7 +256,8 @@ def compute_alignment_metrics(data: dict) -> dict:
     Returns:
         Dictionary with alignment metrics (mean, median, std, variance, n).
     """
-    names = list(data.keys())
+    # Filter out metadata keys (like '_model_name')
+    names = [k for k in data.keys() if not k.startswith('_')]
     n = len(names)
 
     if n < 1:
@@ -315,15 +316,19 @@ def plot_model_analysis(
     output_dir = Path(output_dir)
     output_dir.mkdir(exist_ok=True)
 
+    # Use original model name from cache data if available (preserves periods)
+    original_name = data.get('_model_name', model_name)
+    
     # Sanitize model name for filename
-    safe_name = model_name.replace("/", "_").replace(":", "_")
+    safe_name = original_name.replace("/", "_").replace(":", "_").replace(".", "_")
     output_path = output_dir / f"{safe_name}_correlation.png"
 
-    names = list(data.keys())
+    # Filter out metadata keys
+    names = [k for k in data.keys() if not k.startswith('_')]
     n = len(names)
 
     if n < 2:
-        console.print(f"[red]Not enough data to plot for {model_name}[/red]")
+        console.print(f"[red]Not enough data to plot for {original_name}[/red]")
         return output_path
 
     # Prepare arrays
@@ -362,10 +367,10 @@ def plot_model_analysis(
     text_flat = text_dists[iu]
 
     # Create figure
-    console.print(f"  Generating plots for [bold]{model_name}[/bold]...")
+    console.print(f"  Generating plots for [bold]{original_name}[/bold]...")
     fig = plt.figure(figsize=(18, 18))
     fig.suptitle(
-        f"Color Perception Analysis: {model_name}",
+        f"Color Perception Analysis: {original_name}",
         fontsize=32,
     )
 
