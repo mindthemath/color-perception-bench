@@ -3,6 +3,7 @@
 from color_perception_bench.benchmark import (
     compute_alignment_metrics,
     fetch_embeddings_for_model,
+    plot_model_analysis,
     run_benchmark,
 )
 from color_perception_bench.cache import (
@@ -25,6 +26,7 @@ __all__ = [
     "run_benchmark",
     "fetch_embeddings_for_model",
     "compute_alignment_metrics",
+    "plot_model_analysis",
     # Registry
     "add_model",
     "remove_model",

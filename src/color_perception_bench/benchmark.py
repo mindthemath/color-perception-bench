@@ -6,6 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import TYPE_CHECKING
 
+import matplotlib.pyplot as plt
 import numpy as np
 from rich.console import Console
 from rich.progress import (
@@ -63,7 +64,12 @@ async def _fetch_with_retry(fetch_func, batch, modality: str, max_retries=MAX_RE
         except RuntimeError as e:
             error_str = str(e)
             # Check if it's a rate limit error (429) or a gateway timeout (524)
-            if "429" in error_str or "rate limit" in error_str.lower() or "524" in error_str or "timeout" in error_str.lower():
+            if (
+                "429" in error_str
+                or "rate limit" in error_str.lower()
+                or "524" in error_str
+                or "timeout" in error_str.lower()
+            ):
                 last_error = e
                 if attempt < max_retries - 1:
                     console.print(
@@ -290,6 +296,152 @@ def compute_alignment_metrics(data: dict) -> dict:
         "max": float(np.max(cross_modal_dists)),
         "distances": cross_modal_dists,  # For histogram if needed
     }
+
+
+def plot_model_analysis(
+    model_name: str, data: dict, output_dir: str | Path = "figs"
+) -> Path:
+    """
+    Generate correlation plots for a specific model's embeddings.
+
+    Args:
+        model_name: Name of the model
+        data: Dictionary mapping color names to embeddings
+        output_dir: Directory to save plots (default: "figs")
+
+    Returns:
+        Path to the saved plot file
+    """
+    output_dir = Path(output_dir)
+    output_dir.mkdir(exist_ok=True)
+
+    # Sanitize model name for filename
+    safe_name = model_name.replace("/", "_").replace(":", "_")
+    output_path = output_dir / f"{safe_name}_correlation.png"
+
+    names = list(data.keys())
+    n = len(names)
+
+    if n < 2:
+        console.print(f"[red]Not enough data to plot for {model_name}[/red]")
+        return output_path
+
+    # Prepare arrays
+    rgbs = np.array([data[name]["rgb"] for name in names])
+    text_embs = np.array([data[name]["text_embedding"] for name in names])
+    img_embs = np.array([data[name]["image_embedding"] for name in names])
+
+    # Normalize embeddings
+    text_norms = np.linalg.norm(text_embs, axis=1, keepdims=True)
+    img_norms = np.linalg.norm(img_embs, axis=1, keepdims=True)
+    text_norms[text_norms == 0] = 1
+    img_norms[img_norms == 0] = 1
+    text_embs = text_embs / text_norms
+    img_embs = img_embs / img_norms
+
+    # Compute pairwise RGB distances
+    rgb_diff = rgbs[:, np.newaxis, :] - rgbs[np.newaxis, :, :]
+    rgb_dists = np.linalg.norm(rgb_diff, axis=2)
+
+    # Compute pairwise embedding distances
+    img_sims = np.dot(img_embs, img_embs.T)
+    img_dists = 1 - img_sims
+    text_sims = np.dot(text_embs, text_embs.T)
+    text_dists = 1 - text_sims
+
+    # Cross-modal distances
+    cross_modal_sims = np.sum(text_embs * img_embs, axis=1)
+    cross_modal_dists = 1 - cross_modal_sims
+
+    # Extract upper triangle (excluding diagonal)
+    iu = np.triu_indices(n, k=1)
+    rgb_flat = rgb_dists[iu]
+    img_flat = img_dists[iu]
+    text_flat = text_dists[iu]
+
+    # Create figure
+    console.print(f"  Generating plots for [bold]{model_name}[/bold]...")
+    fig = plt.figure(figsize=(18, 18))
+    fig.suptitle(
+        f"Color Perception Analysis: {model_name}",
+        fontsize=32,
+    )
+
+    gs = fig.add_gridspec(2, 2, height_ratios=[1, 1])
+    ax1 = fig.add_subplot(gs[0, 0])
+    ax2 = fig.add_subplot(gs[0, 1])
+    ax3 = fig.add_subplot(gs[1, :])
+
+    ax1.set_box_aspect(1)
+    ax2.set_box_aspect(1)
+
+    # Plot 1: RGB vs Image Embed
+    hb1 = ax1.hexbin(
+        rgb_flat, img_flat, gridsize=50, cmap="viridis", mincnt=1, bins="log"
+    )
+    ax1.set_xlabel("RGB Euclidean Distance", fontsize=20)
+    ax1.set_ylabel("Image Embedding Cosine Distance", fontsize=20)
+    ax1.set_title("Color Space vs Image Embeddings", fontsize=24)
+    cb1 = fig.colorbar(hb1, ax=ax1)
+    cb1.set_label("Log Count", fontsize=20)
+    cb1.ax.tick_params(labelsize=16)
+
+    # Plot 2: RGB vs Text Embed
+    hb2 = ax2.hexbin(
+        rgb_flat, text_flat, gridsize=50, cmap="viridis", mincnt=1, bins="log"
+    )
+    ax2.set_xlabel("RGB Euclidean Distance", fontsize=20)
+    ax2.set_ylabel("Text Embedding Cosine Distance", fontsize=20)
+    ax2.set_title("Color Space vs Text Embeddings", fontsize=24)
+    cb2 = fig.colorbar(hb2, ax=ax2)
+    cb2.set_label("Log Count", fontsize=20)
+    cb2.ax.tick_params(labelsize=16)
+
+    # Plot 3: Histogram of Text-Image Distances
+    ax3.hist(cross_modal_dists, bins=50, color="skyblue", edgecolor="black")
+    ax3.set_xlabel("Cosine Distance (Text vs Image)", fontsize=20)
+    ax3.set_ylabel("Count", fontsize=20)
+    ax3.set_title(f"Distribution of Text-Image Alignment (N={n})", fontsize=24)
+
+    # Add stats
+    median_dist = np.median(cross_modal_dists)
+    mean_dist = np.mean(cross_modal_dists)
+
+    ax3.axvline(median_dist, color="red", linestyle="dashed", linewidth=5)
+    ax3.annotate(
+        f"Median: {median_dist:.4f}",
+        xy=(median_dist, 0.87),
+        xycoords=ax3.get_xaxis_transform(),
+        xytext=(0.75, 0.87),
+        textcoords="axes fraction",
+        color="red",
+        fontsize=20,
+        verticalalignment="center",
+        arrowprops=dict(arrowstyle="->", color="red", linewidth=3),
+    )
+
+    ax3.axvline(mean_dist, color="blue", linestyle="dashed", linewidth=5)
+    ax3.annotate(
+        f"Mean:    {mean_dist:.4f}",
+        xy=(mean_dist, 0.92),
+        xycoords=ax3.get_xaxis_transform(),
+        xytext=(0.75, 0.92),
+        textcoords="axes fraction",
+        color="blue",
+        fontsize=20,
+        verticalalignment="center",
+        arrowprops=dict(arrowstyle="->", color="blue", linewidth=3),
+    )
+
+    for ax in [ax1, ax2, ax3]:
+        ax.tick_params(axis="both", which="major", labelsize=20)
+
+    plt.tight_layout(rect=[0, 0, 1, 0.975])
+    plt.savefig(output_path, dpi=100)
+    plt.close(fig)
+
+    console.print(f"  [green]✓[/green] Saved plot to [cyan]{output_path}[/cyan]")
+    return output_path
 
 
 def save_results_to_tsv(

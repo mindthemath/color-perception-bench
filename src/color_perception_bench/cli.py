@@ -10,6 +10,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from color_perception_bench.benchmark import (
+    plot_model_analysis,
     print_results_table,
     run_benchmark,
 )
@@ -17,6 +18,7 @@ from color_perception_bench.cache import (
     get_cache_info,
     invalidate_cache,
     list_cached_models,
+    load_embeddings,
 )
 from color_perception_bench.registry import (
     VALID_BATCH_SIZES,
@@ -61,6 +63,7 @@ def show_main_menu() -> str:
     choices = [
         "🚀 Run Benchmark",
         "📋 View Last Results",
+        "📊 Generate Plots",
         "⚙️  Manage Models",
         "🗑️  Clear Cache",
         "❌ Exit",
@@ -452,6 +455,65 @@ def handle_model_menu():
             remove_model_ui()
 
 
+def generate_plots_ui():
+    """Generate correlation plots for cached models."""
+    console.print()
+    console.rule("[bold cyan]Generate Correlation Plots[/bold cyan]")
+    console.print()
+
+    # Get list of cached models
+    cached_models = list_cached_models()
+
+    if not cached_models:
+        console.print("[yellow]No cached models found. Run a benchmark first.[/yellow]")
+        return
+
+    console.print(f"Found {len(cached_models)} cached model(s)")
+    console.print()
+
+    # Let user select which models to plot
+    selected = questionary.checkbox(
+        "Select models to generate plots for:",
+        choices=cached_models,
+        style=custom_style,
+    ).ask()
+
+    if not selected:
+        console.print("[dim]No models selected.[/dim]")
+        return
+
+    console.print()
+    console.print(f"Generating plots for {len(selected)} model(s)...")
+    console.print()
+
+    # Generate plots for each selected model
+    for model_name in selected:
+        try:
+            data = load_embeddings(model_name)
+            if data is None:
+                console.print(f"[red]✗[/red] Failed to load cache for {model_name}")
+                continue
+
+            # Check if cache is complete
+            sample = next(iter(data.values()))
+            if (
+                sample.get("text_embedding") is None
+                or sample.get("image_embedding") is None
+            ):
+                console.print(
+                    f"[yellow]⚠[/yellow] Incomplete cache for {model_name}, skipping"
+                )
+                continue
+
+            plot_model_analysis(model_name, data)
+
+        except Exception as e:
+            console.print(f"[red]✗[/red] Error generating plot for {model_name}: {e}")
+
+    console.print()
+    console.print("[green]✓[/green] Plot generation complete!")
+
+
 def main():
     """Main entry point for the CLI."""
     print_header()
@@ -470,6 +532,8 @@ def main():
         elif "View" in choice:
             console.print()
             print_results_table()
+        elif "Plot" in choice:
+            generate_plots_ui()
         elif "Manage" in choice:
             handle_model_menu()
         elif "Clear" in choice:
