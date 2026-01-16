@@ -62,8 +62,8 @@ async def _fetch_with_retry(fetch_func, batch, modality: str, max_retries=MAX_RE
             return await fetch_func(batch)
         except RuntimeError as e:
             error_str = str(e)
-            # Check if it's a rate limit error (429)
-            if "429" in error_str or "rate limit" in error_str.lower():
+            # Check if it's a rate limit error (429) or a gateway timeout (524)
+            if "429" in error_str or "rate limit" in error_str.lower() or "524" in error_str or "timeout" in error_str.lower():
                 last_error = e
                 if attempt < max_retries - 1:
                     console.print(
