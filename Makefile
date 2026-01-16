@@ -1,10 +1,14 @@
+run:
+	uv run color-perception-bench
+
 exp: lint
 	uv run src/color_perception_bench/experiment.py
-
 
 lint:
 	uvx black src
 	uvx isort --profile black src
+	uvx ty check
+	uvx ruff check .
 
 test-embed:
 	uv run src/color_perception_bench/embeddings.py
