@@ -339,9 +339,11 @@ def plot_model_analysis(
     text_embs = text_embs / text_norms
     img_embs = img_embs / img_norms
 
-    # Compute pairwise RGB distances
+    # Compute pairwise RGB distances and normalize to [0, 1]
     rgb_diff = rgbs[:, np.newaxis, :] - rgbs[np.newaxis, :, :]
     rgb_dists = np.linalg.norm(rgb_diff, axis=2)
+    # Max distance for RGB values in [0, 255] is sqrt(3 * 255^2)
+    rgb_dists = rgb_dists / (255.0 * np.sqrt(3))
 
     # Compute pairwise embedding distances
     img_sims = np.dot(img_embs, img_embs.T)
@@ -379,7 +381,7 @@ def plot_model_analysis(
     hb1 = ax1.hexbin(
         rgb_flat, img_flat, gridsize=50, cmap="viridis", mincnt=1, bins="log"
     )
-    ax1.set_xlabel("RGB Euclidean Distance", fontsize=20)
+    ax1.set_xlabel("Normalized RGB Euclidean Distance", fontsize=20)
     ax1.set_ylabel("Image Embedding Cosine Distance", fontsize=20)
     ax1.set_title("Color Space vs Image Embeddings", fontsize=24)
     cb1 = fig.colorbar(hb1, ax=ax1)
@@ -390,7 +392,7 @@ def plot_model_analysis(
     hb2 = ax2.hexbin(
         rgb_flat, text_flat, gridsize=50, cmap="viridis", mincnt=1, bins="log"
     )
-    ax2.set_xlabel("RGB Euclidean Distance", fontsize=20)
+    ax2.set_xlabel("Normalized RGB Euclidean Distance", fontsize=20)
     ax2.set_ylabel("Text Embedding Cosine Distance", fontsize=20)
     ax2.set_title("Color Space vs Text Embeddings", fontsize=24)
     cb2 = fig.colorbar(hb2, ax=ax2)
@@ -432,6 +434,13 @@ def plot_model_analysis(
         verticalalignment="center",
         arrowprops=dict(arrowstyle="->", color="blue", linewidth=3),
     )
+
+    # Set consistent axis limits for comparison
+    ax1.set_xlim(0, 1)
+    ax1.set_ylim(0, 1)
+    ax2.set_xlim(0, 1)
+    ax2.set_ylim(0, 1)
+    ax3.set_xlim(0, 1)
 
     for ax in [ax1, ax2, ax3]:
         ax.tick_params(axis="both", which="major", labelsize=20)
