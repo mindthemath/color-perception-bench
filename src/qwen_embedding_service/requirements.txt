@@ -1,0 +1,6 @@
+fastapi==0.115.0
+pydantic==2.8.2
+Pillow==10.4.0
+transformers>=4.45.0
+qwen-vl-utils>=0.0.6
+uvicorn==0.30.6

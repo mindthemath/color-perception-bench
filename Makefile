@@ -43,3 +43,45 @@ run-siglip:
 stop-siglip:
 	docker stop siglip-service || true
 	docker rm siglip-service || true
+
+# Qwen3-VL-Embedding Service
+build-qwen-embed:
+	docker build -t qwen-embed-service src/qwen_embedding_service
+
+run-qwen-embed:
+	docker run -d --name qwen-embed-service -p 8003:8000 --gpus all qwen-embed-service
+	@echo "Qwen3-VL-Embedding service running at http://localhost:8003"
+
+stop-qwen-embed:
+	docker stop qwen-embed-service || true
+	docker rm qwen-embed-service || true
+
+test-qwen-embed:
+	@python - <<'PY'
+	import base64
+	import io
+	import json
+	from PIL import Image
+	import requests
+
+	base_url = "http://localhost:8003"
+	health = requests.get(f"{base_url}/health", timeout=10)
+	health.raise_for_status()
+	print("health:", health.json())
+
+	payload = {"input": "red"}
+	resp = requests.post(f"{base_url}/txt/embed", json=payload, timeout=60)
+	resp.raise_for_status()
+	txt = resp.json()["embedding"]
+	print("text embedding dim:", len(txt))
+
+	img = Image.new("RGB", (64, 64), (255, 0, 0))
+	buf = io.BytesIO()
+	img.save(buf, format="PNG")
+	img_b64 = base64.b64encode(buf.getvalue()).decode("utf-8")
+	payload = {"input": f"data:image/png;base64,{img_b64}"}
+	resp = requests.post(f"{base_url}/img/embed", json=payload, timeout=60)
+	resp.raise_for_status()
+	img_emb = resp.json()["embedding"]
+	print("image embedding dim:", len(img_emb))
+	PY

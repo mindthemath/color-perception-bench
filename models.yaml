@@ -116,3 +116,19 @@ models:
       input_field: input
       output_field: embedding
     user_batch_size: 1
+
+  # Qwen - Qwen3-VL-Embedding (Local Docker, smallest variant)
+  qwen3-vl-embed-2b:
+    provider_type: local
+    base_url: http://localhost:8003
+    text_endpoint:
+      path: /txt/embed
+      method: POST
+      input_field: input
+      output_field: embedding
+    image_endpoint:
+      path: /img/embed
+      method: POST
+      input_field: input
+      output_field: embedding
+    user_batch_size: 1
