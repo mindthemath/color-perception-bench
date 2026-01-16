@@ -3,6 +3,11 @@
 ## Objective
 Integrate `Qwen/Qwen3-VL-4B-Instruct` into the `color-perception-bench` as a local provider for semantic search retrieval tasks (text-to-image alignment).
 
+## Model Info
+- **Name:** `Qwen/Qwen3-VL-4B-Instruct`
+- **Release Date:** September 22, 2025
+- **Type:** Multimodal Large Language Model (MLLM)
+
 ## 1. Architectural Approach
 Since `Qwen3-VL-4B-Instruct` is a **generative** model (predicts next tokens) and not natively an **embedding** model (like CLIP or `Qwen3-VL-Embedding`), we cannot use it "as-is" via a simple `.encode()` API.
 

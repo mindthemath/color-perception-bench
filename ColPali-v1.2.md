@@ -2,6 +2,7 @@
 
 ## 1. Model Overview
 - **Name:** `vidore/colpali-v1.2`
+- **Release Date:** June 27, 2024
 - **Developer:** Vidore / Hugging Face contributors.
 - **Type:** Late Interaction (ColBERT architecture) on top of PaliGemma.
 - **Architecture:** 

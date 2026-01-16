@@ -2,6 +2,7 @@
 
 ## 1. Model Overview
 - **Name:** `nvidia/Llama-3.1-Nemotron-51B-Instruct` (Reference point) or `nvidia/NV-Embed-v2` (likely candidate for "8B embedding").
+- **Release Date:** September 23, 2024 (for Llama-3.1-Nemotron-51B-Instruct)
 - **Clarification:** The search results for "Llama-Embed-Nemotron-8B" specifically pointing to a **Visual** retrieval model were ambiguous. Most "Nemotron" embedding models (like `NV-Embed-v2`) are **Text-Only** embedding models that achieve SOTA on text benchmarks (MTEB).
 - **Hypothesis:** You might be referring to a multimodal variant or intending to use this for the *text* side of a pipeline, or there is a very new release not yet widely indexed.
 - **Type:** Large Language Model / Text Embedding Model.

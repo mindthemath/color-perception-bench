@@ -2,6 +2,7 @@
 
 ## 1. Finalized Model
 - **Name:** `BAAI/bge-vl-base`
+- **Release Date:** December 27, 2024
 - **Type:** CLIP-based Multimodal Embedding.
 - **Why this model?** 
   - `BAAI/bge-visualized-base-en-v1.5` was found to be gated/private on Hugging Face (returned 401).
