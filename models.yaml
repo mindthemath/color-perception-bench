@@ -85,15 +85,3 @@ models:
     user_batch_size: 16
     rate_limit_delay: 0.8  # 100 RPM free tier = ~0.6s between requests
 
-  # Example: Self-hosted OpenAI CLIP (most common open source choice)
-  # Requires running your own server with transformers/sentence-transformers
-  # clip-vit-base-patch32:
-  #   provider_type: openai_compatible
-  #   base_url: http://your-clip-server:8000
-  #   text_endpoint:
-  #     path: /embeddings
-  #     model: openai/clip-vit-base-patch32
-  #   image_endpoint:
-  #     path: /embeddings
-  #     model: openai/clip-vit-base-patch32
-  #   user_batch_size: 64

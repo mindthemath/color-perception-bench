@@ -15,3 +15,4 @@ cache/
 # benchmark_results.tsv
 *.tsv
 test_*
+.venv
