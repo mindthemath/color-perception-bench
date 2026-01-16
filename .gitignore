@@ -16,3 +16,4 @@ cache/
 *.tsv
 test_*
 .venv
+NOTES.md
