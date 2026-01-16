@@ -31,3 +31,15 @@ run-bge:
 stop-bge:
 	docker stop bge-service || true
 	docker rm bge-service || true
+
+# SigLIP Service
+build-siglip:
+	docker build -t siglip-service src/siglip_service
+
+run-siglip:
+	docker run -d --name siglip-service -p 8002:8002 siglip-service
+	@echo "SigLIP Service running at http://localhost:8002"
+
+stop-siglip:
+	docker stop siglip-service || true
+	docker rm siglip-service || true

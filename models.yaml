@@ -100,3 +100,19 @@ models:
       input_field: input
       output_field: embedding
     user_batch_size: 1
+
+  # Google - SigLIP 2 (Local Docker)
+  siglip2-so400m:
+    provider_type: local
+    base_url: http://localhost:8002
+    text_endpoint:
+      path: /txt/embed
+      method: POST
+      input_field: input
+      output_field: embedding
+    image_endpoint:
+      path: /img/embed
+      method: POST
+      input_field: input
+      output_field: embedding
+    user_batch_size: 1
