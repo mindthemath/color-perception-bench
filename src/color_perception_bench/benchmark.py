@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 RESULTS_FILE = Path("benchmark_results.tsv")
 MAX_RETRIES = 5
-INITIAL_RETRY_DELAY = 2.0  # seconds
+INITIAL_RETRY_DELAY = 5.0  # seconds
 
 console = Console()
 
@@ -158,7 +158,11 @@ async def fetch_embeddings_for_model(
         cached_partial = None
         if not force_refresh:
             cached_partial = load_embeddings(model_name)
-            if cached_partial and cached_partial.get(color_names[0], {}).get("image_embedding") is not None:
+            if (
+                cached_partial
+                and cached_partial.get(color_names[0], {}).get("image_embedding")
+                is not None
+            ):
                 cached_partial = None  # Cache is complete, already returned earlier
 
         data = {}
@@ -176,9 +180,7 @@ async def fetch_embeddings_for_model(
             # Fetch text embeddings (or use cached)
             text_embeddings = []
             if cached_partial:
-                console.print(
-                    f"  [green]✓[/green] Using cached text embeddings"
-                )
+                console.print(f"  [green]✓[/green] Using cached text embeddings")
                 text_embeddings = [
                     cached_partial[name]["text_embedding"] for name in color_names
                 ]

@@ -32,7 +32,7 @@ models:
       output_field: data[0].embedding
       model: voyage-multimodal-3
     api_key_env: VOYAGE_API_KEY
-    user_batch_size: 128
+    user_batch_size: 32
 
   # Jina AI - Latest CLIP model (Oct 2024)
   # Sign up: https://jina.ai/ → Settings → API Tokens (free tier available)
@@ -45,14 +45,43 @@ models:
       input_field: input
       output_field: data[0].embedding
       model: jina-clip-v2
+      wrap_input: true
+      input_wrapper_key: text
     image_endpoint:
       path: /embeddings
       method: POST
       input_field: input
       output_field: data[0].embedding
       model: jina-clip-v2
+      wrap_input: true
+      input_wrapper_key: image
     api_key_env: JINA_API_KEY
-    user_batch_size: 32
+    user_batch_size: 16
+
+  # Jina AI - Latest multimodal embeddings (Jan 2025)
+  # Same API key as jina-clip-v2, supports text-matching task
+  jina-embeddings-v4:
+    provider_type: openai_compatible
+    base_url: https://api.jina.ai/v1
+    text_endpoint:
+      path: /embeddings
+      method: POST
+      input_field: input
+      output_field: data[0].embedding
+      model: jina-embeddings-v4
+      wrap_input: true
+      input_wrapper_key: text
+    image_endpoint:
+      path: /embeddings
+      method: POST
+      input_field: input
+      output_field: data[0].embedding
+      model: jina-embeddings-v4
+      wrap_input: true
+      input_wrapper_key: image
+    api_key_env: JINA_API_KEY
+    task: text-matching
+    user_batch_size: 16
 
   # Example: Self-hosted OpenAI CLIP (most common open source choice)
   # Requires running your own server with transformers/sentence-transformers

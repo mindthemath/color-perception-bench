@@ -179,6 +179,8 @@ def _config_to_provider_config(name: str, config: dict) -> ProviderConfig:
             input_field=text_ep.get("input_field", "input"),
             output_field=text_ep.get("output_field", "embedding"),
             model=text_ep.get("model"),
+            wrap_input=text_ep.get("wrap_input", False),
+            input_wrapper_key=text_ep.get("input_wrapper_key"),
         ),
         image_endpoint=EndpointConfig(
             path=image_ep["path"],
@@ -186,10 +188,13 @@ def _config_to_provider_config(name: str, config: dict) -> ProviderConfig:
             input_field=image_ep.get("input_field", "input"),
             output_field=image_ep.get("output_field", "embedding"),
             model=image_ep.get("model"),
+            wrap_input=image_ep.get("wrap_input", False),
+            input_wrapper_key=image_ep.get("input_wrapper_key"),
         ),
         api_key_env_var=config.get("api_key_env_var") or config.get("api_key_env"),
         batch_config=BatchConfig(),  # Will be discovered
         user_batch_size=config.get("user_batch_size"),
+        task=config.get("task"),
     )
 
 

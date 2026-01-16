@@ -23,6 +23,10 @@ class EndpointConfig:
     input_field: str = "input"
     output_field: str = "embedding"
     model: str | None = None  # Model name to include in request
+    wrap_input: bool = False  # If True, wrap items in {"text":...}/{"image":...}
+    input_wrapper_key: str | None = (
+        None  # Key for wrapped format (e.g., "text" or "image")
+    )
 
 
 @dataclass
@@ -45,6 +49,9 @@ class ProviderConfig:
     api_key_env_var: str | None = None
     batch_config: BatchConfig = field(default_factory=BatchConfig)
     user_batch_size: int | None = None  # User override for batch size
+    task: str | None = (
+        None  # Optional task parameter (e.g., "text-matching" for Jina v4)
+    )
 
     @property
     def effective_batch_size(self) -> int:

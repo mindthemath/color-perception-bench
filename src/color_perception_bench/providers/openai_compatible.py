@@ -207,14 +207,23 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
         for i in range(0, len(texts), batch_size):
             batch = texts[i : i + batch_size]
 
-            # OpenAI style: input can be string or array
-            payload = {
-                input_field: batch if len(batch) > 1 else batch[0],
-            }
-            
+            # Wrap items if needed (e.g., Jina style: {"text": "..."} or {"image": "..."})
+            if self.config.text_endpoint.wrap_input:
+                wrapper_key = self.config.text_endpoint.input_wrapper_key or "text"
+                batch_input = [{wrapper_key: text} for text in batch]
+            else:
+                # OpenAI style: input can be string or array
+                batch_input = batch if len(batch) > 1 else batch[0]
+
+            payload = {input_field: batch_input}
+
             # Add model if specified
             if self.config.text_endpoint.model:
                 payload["model"] = self.config.text_endpoint.model
+
+            # Add task if specified (e.g., for jina-embeddings-v4)
+            if self.config.task:
+                payload["task"] = self.config.task
 
             async with self._session.post(
                 url, json=payload, headers=self._get_headers()
@@ -250,13 +259,22 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
         for i in range(0, len(base64_images), batch_size):
             batch = base64_images[i : i + batch_size]
 
-            payload = {
-                input_field: batch if len(batch) > 1 else batch[0],
-            }
-            
+            # Wrap items if needed (e.g., Jina style: {"text": "..."} or {"image": "..."})
+            if self.config.image_endpoint.wrap_input:
+                wrapper_key = self.config.image_endpoint.input_wrapper_key or "image"
+                batch_input = [{wrapper_key: img} for img in batch]
+            else:
+                batch_input = batch if len(batch) > 1 else batch[0]
+
+            payload = {input_field: batch_input}
+
             # Add model if specified
             if self.config.image_endpoint.model:
                 payload["model"] = self.config.image_endpoint.model
+
+            # Add task if specified (e.g., for jina-embeddings-v4)
+            if self.config.task:
+                payload["task"] = self.config.task
 
             async with self._session.post(
                 url, json=payload, headers=self._get_headers()
