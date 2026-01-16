@@ -1,5 +1,5 @@
 models:
-  local-default:
+  nomic-embed-v1.5:
     provider_type: local
     base_url: http://localhost:8080
     text_endpoint:

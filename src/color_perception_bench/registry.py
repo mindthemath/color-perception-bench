@@ -236,9 +236,9 @@ def create_default_local_model() -> None:
     """Create the default local model configuration if it doesn't exist."""
     registry = load_registry()
 
-    if "local-default" not in registry.get("models", {}):
+    if "nomic-embed-v1.5" not in registry.get("models", {}):
         add_model(
-            name="local-default",
+            name="nomic-embed-v1.5",
             provider_type="local",
             base_url="http://localhost:8080",
             text_endpoint="/txt/embed",
