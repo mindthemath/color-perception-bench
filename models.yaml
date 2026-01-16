@@ -85,3 +85,18 @@ models:
     user_batch_size: 16
     rate_limit_delay: 0.8  # 100 RPM free tier = ~0.6s between requests
 
+  # BAAI - BGE-VL (Local Docker)
+  bge-vl-base:
+    provider_type: local
+    base_url: http://localhost:8001
+    text_endpoint:
+      path: /txt/embed
+      method: POST
+      input_field: input
+      output_field: embedding
+    image_endpoint:
+      path: /img/embed
+      method: POST
+      input_field: input
+      output_field: embedding
+    user_batch_size: 1

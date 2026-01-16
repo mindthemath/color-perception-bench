@@ -38,14 +38,14 @@ def load_embeddings(model_name: str) -> dict | None:
 
     try:
         data = joblib.load(cache_path)
-        
+
         # Migrate old cache format: add original model name if not present
-        if isinstance(data, dict) and '_model_name' not in data:
-            data['_model_name'] = model_name
+        if isinstance(data, dict) and "_model_name" not in data:
+            data["_model_name"] = model_name
             # Save migrated cache
             joblib.dump(data, cache_path)
             print(f"Migrated cache for {model_name} to include original model name")
-        
+
         return data
     except Exception as e:
         print(f"Warning: Failed to load cache for {model_name}: {e}")
@@ -65,7 +65,7 @@ def save_embeddings(model_name: str, data: dict) -> None:
 
     try:
         # Store original model name in the cache data
-        data['_model_name'] = model_name
+        data["_model_name"] = model_name
         joblib.dump(data, cache_path)
     except Exception as e:
         print(f"Warning: Failed to save cache for {model_name}: {e}")
@@ -109,8 +109,8 @@ def list_cached_models() -> list[str]:
         try:
             data = joblib.load(path)
             # Use original model name from cache data if available
-            if isinstance(data, dict) and '_model_name' in data:
-                cached.append(data['_model_name'])
+            if isinstance(data, dict) and "_model_name" in data:
+                cached.append(data["_model_name"])
             else:
                 # Fallback: extract from filename (old format)
                 name = path.stem.replace("embeddings_", "")

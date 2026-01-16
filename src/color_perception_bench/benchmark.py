@@ -257,7 +257,7 @@ def compute_alignment_metrics(data: dict) -> dict:
         Dictionary with alignment metrics (mean, median, std, variance, n).
     """
     # Filter out metadata keys (like '_model_name')
-    names = [k for k in data.keys() if not k.startswith('_')]
+    names = [k for k in data.keys() if not k.startswith("_")]
     n = len(names)
 
     if n < 1:
@@ -317,14 +317,14 @@ def plot_model_analysis(
     output_dir.mkdir(exist_ok=True)
 
     # Use original model name from cache data if available (preserves periods)
-    original_name = data.get('_model_name', model_name)
-    
+    original_name = data.get("_model_name", model_name)
+
     # Sanitize model name for filename
     safe_name = original_name.replace("/", "_").replace(":", "_").replace(".", "_")
     output_path = output_dir / f"{safe_name}_correlation.png"
 
     # Filter out metadata keys
-    names = [k for k in data.keys() if not k.startswith('_')]
+    names = [k for k in data.keys() if not k.startswith("_")]
     n = len(names)
 
     if n < 2:

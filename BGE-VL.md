@@ -1,63 +1,45 @@
-# Integration Plan: BAAI BGE-VL
+# Integration: BAAI BGE-VL
 
-## 1. Model Overview
-- **Name:** `BAAI/bge-visualized-base-en-v1.5` (and variants like `bge-visualized-m3`)
-- **Developer:** BAAI (Beijing Academy of Artificial Intelligence)
-- **Type:** Dense Multimodal Embedding
-- **Architecture:** CLIP-style dual encoder (Visual Encoder + Text Encoder) but trained with specialized "Visualized" data to align fine-grained visual features with text.
-- **License:** MIT or Apache 2.0 (Check specific model card, usually permissive).
+## 1. Finalized Model
+- **Name:** `BAAI/bge-vl-base`
+- **Type:** CLIP-based Multimodal Embedding.
+- **Why this model?** 
+  - `BAAI/bge-visualized-base-en-v1.5` was found to be gated/private on Hugging Face (returned 401).
+  - `BAAI/bge-vl-base` is publicly accessible and provides a robust multimodal baseline.
 
-## 2. Suitability for Visual Retrieval
-- **Verdict:** **High**.
-- **Reasoning:**
-  - Explicitly designed for "Visualized Information Retrieval" (VisIR).
-  - Produces fixed-size embeddings (unlike ColPali), making it a drop-in replacement for `nomic` or `clip`.
-  - Claims state-of-the-art performance on zero-shot classifications and retrieval benchmarks (MMEB).
+## 2. Integration Status
+- **Docker Service:** Implemented in `src/bge_service`.
+- **API Spec:** Conforms to the `local` provider schema:
+  - `POST /txt/embed`
+  - `POST /img/embed`
+- **Port:** Hosted on `http://localhost:8001`.
 
-## 3. Integration Feasibility
-
-### A. Self-Hosting (Docker)
-- **Feasibility:** **High**.
-- **Dependencies:** `torch`, `transformers`, `pillow`.
-- **Hardware:** Standard GPU support. 
-- **VRAM:** 
-  - `bge-visualized-base-en-v1.5` is relatively small (~300M parameters for ViT-L + BERT base). 
-  - Easily runs on consumer GPUs (even CPU for inference is viable).
-
-### B. API Availability
-- **Public API:** Not widely available as a commercial API (unlike Voyage/Jina). 
-- **Recommendation:** Self-host via Docker.
-
-## 4. Implementation Details
-
-### Docker Service (`src/bge_service`)
-We can create a lightweight FastAPI service similar to the `local` provider pattern.
-
-**Code Snippet (Concept):**
-```python
-from transformers import AutoModel, AutoTokenizer
-from PIL import Image
-import torch
-
-# Load model
-model = AutoModel.from_pretrained('BAAI/bge-visualized-base-en-v1.5', trust_remote_code=True)
-tokenizer = AutoTokenizer.from_pretrained('BAAI/bge-visualized-base-en-v1.5')
-
-def get_embedding(text=None, image=None):
-    with torch.no_grad():
-        if image:
-            # Note: Specific preprocessing might be needed based on model card
-            inputs = tokenizer(images=image, return_tensors="pt")
-            emb = model.get_image_features(**inputs)
-        elif text:
-            inputs = tokenizer(text=text, return_tensors="pt")
-            emb = model.get_text_features(**inputs)
-    return emb.tolist()[0]
+## 3. Usage
+Build and run the service using the provided Makefile:
+```bash
+make build-bge
+make run-bge
 ```
 
-### Challenges / Nuances
-- **Pre-processing:** Ensure the correct image transform is used (standard CLIP transforms vs BGE specific).
-- **Weights:** Some BGE models are just weights for CLIP architecture; others use custom `Visualized_BGE` classes. Need to verify `trust_remote_code=True`.
+Add to `models.yaml`:
+```yaml
+  bge-vl-base:
+    provider_type: local
+    base_url: http://localhost:8001
+    text_endpoint:
+      path: /txt/embed
+      method: POST
+      input_field: input
+      output_field: embedding
+    image_endpoint:
+      path: /img/embed
+      method: POST
+      input_field: input
+      output_field: embedding
+    user_batch_size: 1
+```
 
-## 5. Recommendation
-Prioritize this integration. It fits the existing `models.yaml` schema perfectly (single vector output) and represents a strong open-source baseline.
+## 4. Nuances
+- **Architecture:** Uses `MMRet_CLIP` (custom modeling script downloaded automatically from HF).
+- **Processing:** Uses `CLIPProcessor` (or `AutoProcessor` if compatible).
+- **Normalization:** Embeddings are L2-normalized in the service layer for direct cosine distance compatibility.
