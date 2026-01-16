@@ -307,7 +307,7 @@ def remove_model_ui():
         if remove_model(model):
             console.print(f"[green]✓[/green] Model '{model}' removed.")
         else:
-            console.print(f"[red]Failed to remove model.[/red]")
+            console.print("[red]Failed to remove model.[/red]")
 
 
 def edit_batch_size_ui():
@@ -349,7 +349,7 @@ def edit_batch_size_ui():
             update_model_batch_size(model, None)
         else:
             update_model_batch_size(model, int(new_size))
-        console.print(f"[green]✓[/green] Batch size updated.")
+        console.print("[green]✓[/green] Batch size updated.")
     except Exception as e:
         console.print(f"[red]Error:[/red] {e}")
 
@@ -431,7 +431,7 @@ def clear_cache_ui():
         if invalidate_cache(model_name):
             console.print(f"[green]✓[/green] Cache cleared for '{model_name}'.")
         else:
-            console.print(f"[red]Failed to clear cache.[/red]")
+            console.print("[red]Failed to clear cache.[/red]")
 
 
 def handle_model_menu():

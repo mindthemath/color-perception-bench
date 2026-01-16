@@ -23,7 +23,7 @@ from rich.table import Table
 from color_perception_bench.cache import load_embeddings, save_embeddings
 from color_perception_bench.colors import XKCD_COLORS_RGB, create_swatch_image
 from color_perception_bench.providers.base import ProviderValidationError
-from color_perception_bench.registry import get_provider, sanitize_model_name
+from color_perception_bench.registry import get_provider
 
 if TYPE_CHECKING:
     from color_perception_bench.providers.local import LocalProvider
@@ -131,7 +131,7 @@ async def fetch_embeddings_for_model(
         # Validate endpoints
         try:
             await provider.validate_endpoints()
-            console.print(f"  [green]✓[/green] Endpoints validated")
+            console.print("  [green]✓[/green] Endpoints validated")
         except ProviderValidationError as e:
             console.print(f"  [red]✗[/red] Validation failed: {e}")
             raise
@@ -146,7 +146,7 @@ async def fetch_embeddings_for_model(
             )
         else:
             console.print(
-                f"  [yellow]![/yellow] No batch support, using sequential requests"
+                "  [yellow]![/yellow] No batch support, using sequential requests"
             )
 
         # Prepare data
@@ -180,7 +180,7 @@ async def fetch_embeddings_for_model(
             # Fetch text embeddings (or use cached)
             text_embeddings = []
             if cached_partial:
-                console.print(f"  [green]✓[/green] Using cached text embeddings")
+                console.print("  [green]✓[/green] Using cached text embeddings")
                 text_embeddings = [
                     cached_partial[name]["text_embedding"] for name in color_names
                 ]
@@ -199,7 +199,7 @@ async def fetch_embeddings_for_model(
 
                 # Save partial cache with text embeddings only
                 console.print(
-                    f"  [blue]→[/blue] Caching text embeddings (partial save)..."
+                    "  [blue]→[/blue] Caching text embeddings (partial save)..."
                 )
                 partial_data = {}
                 for i, name in enumerate(color_names):

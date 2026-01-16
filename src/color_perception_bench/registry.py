@@ -1,6 +1,5 @@
 """Model registry for managing embedding providers."""
 
-import os
 import re
 from pathlib import Path
 from typing import Literal
@@ -195,6 +194,7 @@ def _config_to_provider_config(name: str, config: dict) -> ProviderConfig:
         batch_config=BatchConfig(),  # Will be discovered
         user_batch_size=config.get("user_batch_size"),
         task=config.get("task"),
+        rate_limit_delay=config.get("rate_limit_delay"),
     )
 
 

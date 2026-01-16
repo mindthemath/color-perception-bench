@@ -57,6 +57,7 @@ models:
       input_wrapper_key: image
     api_key_env: JINA_API_KEY
     user_batch_size: 16
+    rate_limit_delay: 0.8  # 100 RPM free tier = ~0.6s between requests
 
   # Jina AI - Latest multimodal embeddings (Jan 2025)
   # Same API key as jina-clip-v2, supports text-matching task
@@ -82,6 +83,7 @@ models:
     api_key_env: JINA_API_KEY
     task: text-matching
     user_batch_size: 16
+    rate_limit_delay: 0.8  # 100 RPM free tier = ~0.6s between requests
 
   # Example: Self-hosted OpenAI CLIP (most common open source choice)
   # Requires running your own server with transformers/sentence-transformers

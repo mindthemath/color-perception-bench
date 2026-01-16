@@ -1,5 +1,6 @@
 """OpenAI-compatible embedding provider for standard API endpoints."""
 
+import asyncio
 import base64
 import io
 import os
@@ -67,6 +68,7 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
             return self._openapi_schema
 
         await self._ensure_session()
+        assert self._session is not None
         url = f"{self.config.base_url}/openapi.json"
 
         try:
@@ -196,6 +198,7 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
     async def get_text_embeddings(self, texts: list[str]) -> list[np.ndarray]:
         """Get embeddings for text inputs using OpenAI-style API."""
         await self._ensure_session()
+        assert self._session is not None
 
         url = f"{self.config.base_url}{self.config.text_endpoint.path}"
         input_field = self.config.text_endpoint.input_field
@@ -236,11 +239,16 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
                 batch_embeddings = self._parse_embedding_response(data)
                 embeddings.extend(batch_embeddings)
 
+            # Rate limit delay if configured
+            if self.config.rate_limit_delay and i + batch_size < len(texts):
+                await asyncio.sleep(self.config.rate_limit_delay)
+
         return embeddings
 
     async def get_image_embeddings(self, images: list[Image.Image]) -> list[np.ndarray]:
         """Get embeddings for image inputs using OpenAI-style API."""
         await self._ensure_session()
+        assert self._session is not None
 
         url = f"{self.config.base_url}{self.config.image_endpoint.path}"
         input_field = self.config.image_endpoint.input_field
@@ -288,6 +296,10 @@ class OpenAICompatibleProvider(BaseAsyncProvider):
                 data = await resp.json()
                 batch_embeddings = self._parse_embedding_response(data)
                 embeddings.extend(batch_embeddings)
+
+            # Rate limit delay if configured
+            if self.config.rate_limit_delay and i + batch_size < len(base64_images):
+                await asyncio.sleep(self.config.rate_limit_delay)
 
         return embeddings
 

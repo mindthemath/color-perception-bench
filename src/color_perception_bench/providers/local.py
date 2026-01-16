@@ -39,6 +39,7 @@ class LocalProvider(BaseAsyncProvider):
             return self._openapi_schema
 
         await self._ensure_session()
+        assert self._session is not None
         url = f"{self.config.base_url}/openapi.json"
 
         try:
@@ -178,6 +179,7 @@ class LocalProvider(BaseAsyncProvider):
     async def get_text_embeddings(self, texts: list[str]) -> list[np.ndarray]:
         """Get embeddings for text inputs."""
         await self._ensure_session()
+        assert self._session is not None
 
         url = f"{self.config.base_url}{self.config.text_endpoint.path}"
         input_field = self.config.text_endpoint.input_field
@@ -230,6 +232,7 @@ class LocalProvider(BaseAsyncProvider):
     async def get_image_embeddings(self, images: list[Image.Image]) -> list[np.ndarray]:
         """Get embeddings for image inputs."""
         await self._ensure_session()
+        assert self._session is not None
 
         url = f"{self.config.base_url}{self.config.image_endpoint.path}"
         input_field = self.config.image_endpoint.input_field

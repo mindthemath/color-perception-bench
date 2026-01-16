@@ -1,6 +1,5 @@
 """Caching layer for embeddings data."""
 
-import os
 from pathlib import Path
 
 import joblib

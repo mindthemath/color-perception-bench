@@ -29,7 +29,6 @@ def get_image_embedding(image: Image.Image) -> list[float]:
 def cosine_distance(vec, other_vec):
     """Compute the cosine distance between two vectors."""
     from numpy import dot
-    from numpy.linalg import norm
 
     return 1 - dot(vec, other_vec)  # / (norm(vec) * norm(other_vec))
 

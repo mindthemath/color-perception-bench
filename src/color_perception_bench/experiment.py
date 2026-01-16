@@ -221,7 +221,7 @@ def plot_analysis(results, output_path="color_perception_correlation.png"):
     for ax in [ax1, ax2, ax3]:
         ax.tick_params(axis="both", which="major", labelsize=20)
 
-    plt.tight_layout(rect=[0, 0, 1, 0.975])  # type: ignore
+    plt.tight_layout(rect=[0, 0, 1, 0.975])
     output_path = "color_perception_correlation.png"
     plt.savefig(output_path)
     print(f"Saved plot to {output_path}")

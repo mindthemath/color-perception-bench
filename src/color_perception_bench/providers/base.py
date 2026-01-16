@@ -2,10 +2,13 @@
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Protocol, runtime_checkable
 
 import numpy as np
 from PIL import Image
+
+if TYPE_CHECKING:
+    import aiohttp
 
 
 class ProviderValidationError(Exception):
@@ -51,6 +54,9 @@ class ProviderConfig:
     user_batch_size: int | None = None  # User override for batch size
     task: str | None = (
         None  # Optional task parameter (e.g., "text-matching" for Jina v4)
+    )
+    rate_limit_delay: float | None = (
+        None  # Delay in seconds between batches to avoid rate limits
     )
 
     @property
@@ -125,7 +131,7 @@ class BaseAsyncProvider(ABC):
 
     def __init__(self, config: ProviderConfig):
         self.config = config
-        self._session = None
+        self._session: "aiohttp.ClientSession | None" = None
 
     @abstractmethod
     async def _ensure_session(self):
