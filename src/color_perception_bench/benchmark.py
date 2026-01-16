@@ -33,7 +33,7 @@ if TYPE_CHECKING:
 
 RESULTS_FILE = Path("benchmark_results.tsv")
 MAX_RETRIES = 5
-INITIAL_RETRY_DELAY = 1.0  # seconds
+INITIAL_RETRY_DELAY = 2.0  # seconds
 
 console = Console()
 
