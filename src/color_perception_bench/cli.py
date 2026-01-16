@@ -73,6 +73,8 @@ def show_main_menu() -> str:
         "What would you like to do?",
         choices=choices,
         style=custom_style,
+        use_shortcuts=True,
+        use_arrow_keys=True,
     ).ask()
 
 
@@ -90,6 +92,8 @@ def show_model_menu() -> str:
         "Model Management:",
         choices=choices,
         style=custom_style,
+        use_shortcuts=True,
+        use_arrow_keys=True,
     ).ask()
 
 
