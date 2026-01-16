@@ -32,8 +32,60 @@ if TYPE_CHECKING:
     )
 
 RESULTS_FILE = Path("benchmark_results.tsv")
+MAX_RETRIES = 5
+INITIAL_RETRY_DELAY = 1.0  # seconds
 
 console = Console()
+
+
+async def _fetch_with_retry(fetch_func, batch, modality: str, max_retries=MAX_RETRIES):
+    """
+    Fetch embeddings with exponential backoff retry on rate limits.
+
+    Args:
+        fetch_func: The async function to call (get_text_embeddings or get_image_embeddings)
+        batch: The batch of items to process
+        modality: Either "text" or "image" for error messages
+        max_retries: Maximum number of retry attempts
+
+    Returns:
+        List of embeddings
+
+    Raises:
+        RuntimeError: If all retries are exhausted
+    """
+    delay = INITIAL_RETRY_DELAY
+    last_error = None
+
+    for attempt in range(max_retries):
+        try:
+            return await fetch_func(batch)
+        except RuntimeError as e:
+            error_str = str(e)
+            # Check if it's a rate limit error (429)
+            if "429" in error_str or "rate limit" in error_str.lower():
+                last_error = e
+                if attempt < max_retries - 1:
+                    console.print(
+                        f"  [yellow]⚠[/yellow] Rate limit hit, retrying in {delay:.1f}s "
+                        f"(attempt {attempt + 1}/{max_retries})..."
+                    )
+                    await asyncio.sleep(delay)
+                    delay *= 2  # Exponential backoff
+                    continue
+                else:
+                    console.print(
+                        f"  [red]✗[/red] Rate limit exceeded after {max_retries} attempts"
+                    )
+                    raise
+            else:
+                # Not a rate limit error, raise immediately
+                raise
+
+    # If we get here, all retries failed
+    raise RuntimeError(
+        f"{modality.capitalize()} embedding failed after {max_retries} retries"
+    ) from last_error
 
 
 async def fetch_embeddings_for_model(
@@ -56,10 +108,20 @@ async def fetch_embeddings_for_model(
     if not force_refresh:
         cached = load_embeddings(model_name)
         if cached is not None:
-            console.print(
-                f"[green]✓[/green] Loaded {len(cached)} colors from cache for [bold]{model_name}[/bold]"
-            )
-            return cached
+            # Check if cache is complete (has both text and image embeddings)
+            sample_entry = next(iter(cached.values()))
+            if (
+                sample_entry.get("image_embedding") is not None
+                and sample_entry.get("text_embedding") is not None
+            ):
+                console.print(
+                    f"[green]✓[/green] Loaded {len(cached)} colors from cache for [bold]{model_name}[/bold]"
+                )
+                return cached
+            else:
+                console.print(
+                    f"[yellow]![/yellow] Found partial cache for [bold]{model_name}[/bold], completing..."
+                )
 
     console.print(
         f"[blue]→[/blue] Fetching embeddings for [bold]{model_name}[/bold]..."
@@ -92,6 +154,13 @@ async def fetch_embeddings_for_model(
         color_rgbs = list(XKCD_COLORS_RGB.values())
         n_colors = len(color_names)
 
+        # Check for partial cache
+        cached_partial = None
+        if not force_refresh:
+            cached_partial = load_embeddings(model_name)
+            if cached_partial and cached_partial.get(color_names[0], {}).get("image_embedding") is not None:
+                cached_partial = None  # Cache is complete, already returned earlier
+
         data = {}
 
         with Progress(
@@ -104,17 +173,40 @@ async def fetch_embeddings_for_model(
             TimeRemainingColumn(),
             console=console,
         ) as progress:
-            # Fetch text embeddings in batches
-            text_task = progress.add_task(
-                f"  Text embeddings ({model_name})", total=n_colors
-            )
-
+            # Fetch text embeddings (or use cached)
             text_embeddings = []
-            for i in range(0, n_colors, effective_batch):
-                batch_names = color_names[i : i + effective_batch]
-                batch_embs = await provider.get_text_embeddings(batch_names)
-                text_embeddings.extend(batch_embs)
-                progress.update(text_task, advance=len(batch_names))
+            if cached_partial:
+                console.print(
+                    f"  [green]✓[/green] Using cached text embeddings"
+                )
+                text_embeddings = [
+                    cached_partial[name]["text_embedding"] for name in color_names
+                ]
+            else:
+                text_task = progress.add_task(
+                    f"  Text embeddings ({model_name})", total=n_colors
+                )
+
+                for i in range(0, n_colors, effective_batch):
+                    batch_names = color_names[i : i + effective_batch]
+                    batch_embs = await _fetch_with_retry(
+                        provider.get_text_embeddings, batch_names, "text"
+                    )
+                    text_embeddings.extend(batch_embs)
+                    progress.update(text_task, advance=len(batch_names))
+
+                # Save partial cache with text embeddings only
+                console.print(
+                    f"  [blue]→[/blue] Caching text embeddings (partial save)..."
+                )
+                partial_data = {}
+                for i, name in enumerate(color_names):
+                    partial_data[name] = {
+                        "rgb": color_rgbs[i],
+                        "text_embedding": text_embeddings[i],
+                        "image_embedding": None,  # Placeholder
+                    }
+                save_embeddings(model_name, partial_data)
 
             # Fetch image embeddings in batches
             img_task = progress.add_task(
@@ -125,7 +217,9 @@ async def fetch_embeddings_for_model(
             for i in range(0, n_colors, effective_batch):
                 batch_rgbs = color_rgbs[i : i + effective_batch]
                 batch_images = [create_swatch_image(rgb) for rgb in batch_rgbs]
-                batch_embs = await provider.get_image_embeddings(batch_images)
+                batch_embs = await _fetch_with_retry(
+                    provider.get_image_embeddings, batch_images, "image"
+                )
                 image_embeddings.extend(batch_embs)
                 progress.update(img_task, advance=len(batch_rgbs))
 
