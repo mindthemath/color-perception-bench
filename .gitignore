@@ -17,3 +17,4 @@ cache/
 test_*
 .venv
 NOTES.md
+.DS_Store

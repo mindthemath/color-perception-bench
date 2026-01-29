@@ -3,7 +3,7 @@ models:
     provider_type: local
     base_url: http://localhost:8080
     text_endpoint:
-      path: /txt/embed
+      path: /txt/query
       method: POST
       input_field: input
       output_field: embedding
